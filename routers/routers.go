@@ -4,11 +4,15 @@ import (
 	"SimpleGinDemo/controllers"
 	"SimpleGinDemo/middlewares"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 	"os"
 )
 
 func InitRouter() {
+	gin.DisableConsoleColor()
+	f, _ := os.Create("Transfer.log")
+	gin.DefaultWriter = io.MultiWriter(f)
 	router := gin.Default()
 	// 信任代理来源
 	if err := router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
@@ -22,10 +26,11 @@ func InitRouter() {
 	router.LoadHTMLGlob("web/template/*")
 	v1 := router.Group("/")
 	{
-		v1.GET("/", controllers.FileUpload)
+		v1.POST("/upload", controllers.FileUpload)
+		v1.GET("/getFile", controllers.GetFile)
 	}
 
-	if err := router.Run("0.0.0.0:8855"); err != nil {
+	if err := router.Run("0.0.0.0:8888"); err != nil {
 		os.Exit(1)
 	}
 }
