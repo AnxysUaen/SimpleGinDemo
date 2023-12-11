@@ -3,7 +3,7 @@
         <div style="width: 60%;margin: 16px auto;display: flex;gap: 20px;">
             <el-input v-model="currentPath" disabled></el-input>
             <el-upload
-                action="/fileMgr/upload"
+                action="/new-casher/filetrans/fileMgr/upload"
                 :data="{ path: currentPath }"
                 :show-file-list="false"
                 :before-upload="beforeUpload"
@@ -54,7 +54,7 @@ let routePath = (row, del) => {
         currentPathArr.push(row.name)
     }
     let path = currentPathArr.length == 1 ? currentPathArr[0] + "/" : currentPathArr.join("/")
-    if (del) {
+    if (del === "del") {
         currentPathArr.pop()
         handelDelete(path)
         return
@@ -75,7 +75,7 @@ let getFile = (path, row) => {
     } else {
         const link = document.createElement('a')
         link.style.display = "none"
-        link.href = "/fileMgr/getFile?fileName=" + path
+        link.href = "/new-casher/filetrans/fileMgr/getFile?fileName=" + path
         link.setAttribute('download', row.name)
         document.body.appendChild(link)
         link.click()
@@ -85,7 +85,7 @@ let getFile = (path, row) => {
 let handelDelete = (path) => {
     const options = {
         method: 'POST',
-        url: '/fileMgr/delFile',
+        url: '/new-casher/filetrans/fileMgr/delFile',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: { path: path }
     }
@@ -99,7 +99,7 @@ let getList = (path) => {
     tableData.length = 0
     const options = {
         method: 'POST',
-        url: '/fileMgr/getList',
+        url: '/new-casher/filetrans/fileMgr/getList',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: { path: path }
     }
