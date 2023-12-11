@@ -2,7 +2,10 @@ module SimpleGinDemo
 
 go 1.21.4
 
-require github.com/gin-gonic/gin v1.9.1
+require (
+	github.com/atotto/clipboard v0.1.4
+	github.com/gin-gonic/gin v1.9.1
+)
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect

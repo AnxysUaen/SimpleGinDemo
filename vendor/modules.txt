@@ -1,3 +1,6 @@
+# github.com/atotto/clipboard v0.1.4
+## explicit
+github.com/atotto/clipboard
 # github.com/bytedance/sonic v1.9.1
 ## explicit; go 1.15
 github.com/bytedance/sonic

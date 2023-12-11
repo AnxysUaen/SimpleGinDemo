@@ -25,11 +25,11 @@ func InitRouter() {
 
 	router.StaticFS("/assets", http.Dir("./web/assets"))
 	router.LoadHTMLFiles("./web/index.html")
-	router.GET("/", func(c *gin.Context) {
+	router.GET("", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
-	router.GET("/favicon.ico", func(c *gin.Context) {
-		c.File("./web/favicon.ico")
+	router.GET("/favicon.svg", func(c *gin.Context) {
+		c.File("./web/favicon.svg")
 	})
 
 	fileMgr := router.Group("/fileMgr")
@@ -38,6 +38,11 @@ func InitRouter() {
 		fileMgr.POST("/delFile", controllers.DelFile)
 		fileMgr.POST("/upload", controllers.FileUpload)
 		fileMgr.GET("/getFile", controllers.GetFile)
+	}
+	tools := router.Group("/tools")
+	{
+		tools.POST("/sendText", controllers.SendText)
+		tools.POST("/getText", controllers.GetText)
 	}
 
 	if err := router.Run("0.0.0.0:8888"); err != nil {
