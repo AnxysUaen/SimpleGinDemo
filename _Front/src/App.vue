@@ -38,8 +38,8 @@
             </el-table>
         </div>
         <div style="width: 35%;margin: 16px 0;">
-            <el-input v-model="sendText" type="textarea" :rows="31" placeholder="请输入内容" />
-            <div>
+            <el-input v-model="sendText" type="textarea" :rows="28" placeholder="请输入内容" />
+            <div style="margin-top: 16px;">
                 <el-button type="primary" size="small" :loading="sendLoading" @click="handleSend">发送到剪贴板</el-button>
                 <el-button type="primary" size="small" :loading="sendLoading" @click="handleReceive">获取自剪贴板</el-button>
             </div>
@@ -155,7 +155,7 @@ let handleSend = () => {
     sendLoading.value = true
     const options = {
         method: 'POST',
-        url: 'tools/SendText',
+        url: 'tools/sendText',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: { text: sendText.value }
     }
@@ -176,7 +176,7 @@ let handleReceive = () => {
     sendLoading.value = true
     const options = {
         method: 'POST',
-        url: 'tools/GetText',
+        url: 'tools/getText',
         headers: { 'content-type': 'application/x-www-form-urlencoded' }
     }
     axios.request(options).then(res => {

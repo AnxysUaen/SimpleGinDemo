@@ -61,6 +61,7 @@ export default defineConfig({
         Inspect(),
     ],
     build: {
-        emptyOutDir: true
+        emptyOutDir: true,
+        outDir: "../web"
     }
 });
