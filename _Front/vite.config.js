@@ -11,6 +11,7 @@ import Inspect from "vite-plugin-inspect";
 const pathSrc = path.resolve(__dirname, "src");
 
 export default defineConfig({
+    base: './',
     resolve: {
         alias: {
             "@": pathSrc,
@@ -58,5 +59,9 @@ export default defineConfig({
         }),
 
         Inspect(),
-    ]
+    ],
+    build: {
+        emptyOutDir: true,
+        
+    }
 });
