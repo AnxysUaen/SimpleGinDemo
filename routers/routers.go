@@ -13,6 +13,7 @@ func InitRouter() {
 	gin.DisableConsoleColor()
 	f, _ := os.Create("Transfer.log")
 	gin.DefaultWriter = io.MultiWriter(f)
+
 	router := gin.Default()
 	// 信任代理来源
 	if err := router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
@@ -20,10 +21,16 @@ func InitRouter() {
 	}
 	// 要在路由组之前全局使用「跨域中间件」, 否则OPTIONS会返回404
 	router.Use(middlewares.Cors())
-	// 使用 session(cookie-based)
-	//router.Use(sessions.Sessions("myyyyysession", Sessions.Store))
-	router.StaticFS("/public", http.Dir("./web/static"))
-	router.LoadHTMLGlob("web/template/*")
+
+	router.StaticFS("/static", http.Dir("./@websrc/static"))
+	router.LoadHTMLFiles("./web/index.html")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("./web/favicon.ico")
+	})
+
 	fileMgr := router.Group("/fileMgr")
 	{
 		fileMgr.POST("/getList", controllers.GetList)

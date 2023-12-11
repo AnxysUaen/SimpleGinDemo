@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"SimpleGinDemo/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -41,13 +42,13 @@ func GetFile(c *gin.Context) {
 		})
 		return
 	}
-	if _, err := os.Stat(filepath.Join("./", fileName)); err != nil {
+	if _, err := os.Stat(filepath.Clean(fileName)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"errMsg": "文件不存在",
 		})
 		return
 	}
-	c.File(filepath.Join("./", fileName))
+	c.File(filepath.Clean(fileName))
 }
 
 func GetList(c *gin.Context) {
@@ -55,16 +56,11 @@ func GetList(c *gin.Context) {
 	info, _ := os.Stat(filepath.Clean(path))
 	if info.IsDir() {
 		files, _ := os.ReadDir(path)
-		type FileData struct {
-			Name  string `json:"name"`
-			IsDir bool   `json:"isDir"`
-			Size  int64  `json:"size"`
-		}
-		fileDatas := make([]FileData, 0)
+		fileDatas := make([]models.FileData, 0)
 		for f := 0; f < len(files); f++ {
 			file := files[f]
 			fileInfo, _ := file.Info()
-			fileDatas = append(fileDatas, FileData{
+			fileDatas = append(fileDatas, models.FileData{
 				Name:  file.Name(),
 				IsDir: file.IsDir(),
 				Size:  fileInfo.Size(),
