@@ -22,7 +22,7 @@ func InitRouter() {
 	// 要在路由组之前全局使用「跨域中间件」, 否则OPTIONS会返回404
 	router.Use(middlewares.Cors())
 
-	router.StaticFS("/static", http.Dir("./@websrc/static"))
+	router.StaticFS("/assets", http.Dir("./web/assets"))
 	router.LoadHTMLFiles("./web/index.html")
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
@@ -34,7 +34,7 @@ func InitRouter() {
 	fileMgr := router.Group("/fileMgr")
 	{
 		fileMgr.POST("/getList", controllers.GetList)
-		fileMgr.POST("/delete", controllers.FileUpload)
+		fileMgr.POST("/delFile", controllers.DelFile)
 		fileMgr.POST("/upload", controllers.FileUpload)
 		fileMgr.GET("/getFile", controllers.GetFile)
 	}

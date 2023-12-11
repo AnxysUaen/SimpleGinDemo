@@ -33,6 +33,24 @@ func FileUpload(c *gin.Context) {
 		}
 	}
 }
+func DelFile(c *gin.Context) {
+	path, has := c.GetPostForm("path")
+	if !has {
+		c.JSON(http.StatusOK, gin.H{
+			"errMsg": "缺少字段[path]",
+		})
+		return
+	}
+	if err := os.Remove(filepath.Clean(path)); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"errMsg": err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"succMsg": "ok",
+		})
+	}
+}
 
 func GetFile(c *gin.Context) {
 	fileName, has := c.GetQuery("fileName")

@@ -82,7 +82,7 @@ let getFile = (path, row) => {
         document.body.removeChild(link)
     }
 }
-let handelDelete = (row) => {
+let handelDelete = (path) => {
     const options = {
         method: 'POST',
         url: '/fileMgr/delFile',
