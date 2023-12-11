@@ -44,7 +44,7 @@ func GetFile(c *gin.Context) {
 	}
 	if _, err := os.Stat(filepath.Clean(fileName)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"errMsg": "文件不存在",
+			"errMsg": err,
 		})
 		return
 	}
@@ -55,7 +55,7 @@ func GetList(c *gin.Context) {
 	path := c.DefaultPostForm("path", "/")
 	info, _ := os.Stat(filepath.Clean(path))
 	if info.IsDir() {
-		files, _ := os.ReadDir(path)
+		files, _ := os.ReadDir(filepath.Clean(path))
 		fileDatas := make([]models.FileData, 0)
 		for f := 0; f < len(files); f++ {
 			file := files[f]
