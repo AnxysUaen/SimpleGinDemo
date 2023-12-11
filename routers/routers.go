@@ -24,10 +24,12 @@ func InitRouter() {
 	//router.Use(sessions.Sessions("myyyyysession", Sessions.Store))
 	router.StaticFS("/public", http.Dir("./web/static"))
 	router.LoadHTMLGlob("web/template/*")
-	v1 := router.Group("/")
+	fileMgr := router.Group("/fileMgr")
 	{
-		v1.POST("/upload", controllers.FileUpload)
-		v1.GET("/getFile", controllers.GetFile)
+		fileMgr.POST("/getList", controllers.GetList)
+		fileMgr.POST("/delete", controllers.FileUpload)
+		fileMgr.POST("/upload", controllers.FileUpload)
+		fileMgr.GET("/getFile", controllers.GetFile)
 	}
 
 	if err := router.Run("0.0.0.0:8888"); err != nil {

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func FileUpload(c *gin.Context) {
@@ -20,7 +20,7 @@ func FileUpload(c *gin.Context) {
 			"errMsg": "服务文件接收失败!",
 		})
 	} else {
-		err := c.SaveUploadedFile(file, path.Join(savePath, file.Filename))
+		err := c.SaveUploadedFile(file, filepath.Join(savePath, file.Filename))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"errMsg": "文件保存失败",
@@ -41,11 +41,38 @@ func GetFile(c *gin.Context) {
 		})
 		return
 	}
-	if _, err := os.Stat(path.Join("./", fileName)); err != nil {
+	if _, err := os.Stat(filepath.Join("./", fileName)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"errMsg": "文件不存在",
 		})
 		return
 	}
-	c.File(path.Join("./", fileName))
+	c.File(filepath.Join("./", fileName))
+}
+
+func GetList(c *gin.Context) {
+	path := c.DefaultPostForm("path", "/")
+	info, _ := os.Stat(filepath.Clean(path))
+	if info.IsDir() {
+		files, _ := os.ReadDir(path)
+		type FileData struct {
+			Name  string `json:"name"`
+			IsDir bool   `json:"isDir"`
+			Size  int64  `json:"size"`
+		}
+		fileDatas := make([]FileData, 0)
+		for f := 0; f < len(files); f++ {
+			file := files[f]
+			fileInfo, _ := file.Info()
+			fileDatas = append(fileDatas, FileData{
+				Name:  file.Name(),
+				IsDir: file.IsDir(),
+				Size:  fileInfo.Size(),
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"succMsg": "ok",
+			"data":    fileDatas,
+		})
+	}
 }
