@@ -3,7 +3,7 @@
         <div style="width: 60%;margin: 16px auto;display: flex;gap: 20px;">
             <el-input v-model="currentPath" disabled></el-input>
             <el-upload
-                action="http://127.0.0.1:8888/fileMgr/upload"
+                action="/fileMgr/upload"
                 :data="{ path: currentPath }"
                 :show-file-list="false"
                 :before-upload="beforeUpload"
@@ -75,7 +75,7 @@ let getFile = (path, row) => {
     } else {
         const link = document.createElement('a')
         link.style.display = "none"
-        link.href = "http://127.0.0.1:8888/fileMgr/getFile?fileName=" + path
+        link.href = "/fileMgr/getFile?fileName=" + path
         link.setAttribute('download', row.name)
         document.body.appendChild(link)
         link.click()
@@ -85,7 +85,7 @@ let getFile = (path, row) => {
 let handelDelete = (row) => {
     const options = {
         method: 'POST',
-        url: 'http://127.0.0.1:8888/fileMgr/delFile',
+        url: '/fileMgr/delFile',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: { path: path }
     }
@@ -99,7 +99,7 @@ let getList = (path) => {
     tableData.length = 0
     const options = {
         method: 'POST',
-        url: 'http://127.0.0.1:8888/fileMgr/getList',
+        url: '/fileMgr/getList',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         data: { path: path }
     }
