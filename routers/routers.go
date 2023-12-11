@@ -14,11 +14,12 @@ func InitRouter() {
 	f, _ := os.Create("Transfer.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	// 信任代理来源
-	if err := router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
-		return
-	}
+	//if err := router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
+	//	return
+	//}
 	// 要在路由组之前全局使用「跨域中间件」, 否则OPTIONS会返回404
 	router.Use(middlewares.Cors())
 
