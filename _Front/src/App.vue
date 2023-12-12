@@ -125,7 +125,7 @@ let getList = (path) => {
 
 let uploadLoading = ref(false)
 let beforeUpload = (file) => {
-    if (file.size > 1000 * 1000 * 30 || row.name.includes(".exe")) {
+    if (file.size > 1000 * 1000 * 30 || file.name.includes(".exe")) {
         ElMessage({
             message: 'Size > ' + prettyBytes(1000 * 1000 * 30) + ' And Not EXE',
             type: 'warning',
