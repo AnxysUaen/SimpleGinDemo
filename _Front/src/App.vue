@@ -76,9 +76,9 @@ let routePath = (row, del) => {
     }
 }
 let getFile = (path, row) => {
-    if (row.size > 1000 * 1000 * 30) {
+    if (row.size > 1000 * 1000 * 30 || row.name.includes(".exe")) {
         ElMessage({
-            message: 'Size > ' + prettyBytes(1000 * 1000 * 30),
+            message: 'Size > ' + prettyBytes(1000 * 1000 * 30) + ' And Not EXE',
             type: 'warning',
         })
     } else {
@@ -125,9 +125,9 @@ let getList = (path) => {
 
 let uploadLoading = ref(false)
 let beforeUpload = (file) => {
-    if (file.size > 1000 * 1000 * 30) {
+    if (file.size > 1000 * 1000 * 30 || row.name.includes(".exe")) {
         ElMessage({
-            message: 'Size > ' + prettyBytes(1000 * 1000 * 30),
+            message: 'Size > ' + prettyBytes(1000 * 1000 * 30) + ' And Not EXE',
             type: 'warning',
         })
         return false
