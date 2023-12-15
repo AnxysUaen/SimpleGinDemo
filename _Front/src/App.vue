@@ -2,7 +2,20 @@
     <div style="display: flex;justify-content: center;gap: 30px;">
         <div style="width: 55%;">
             <div style="margin: 16px 0;display: flex;gap: 20px;">
-                <el-input v-model="currentPath" disabled></el-input>
+                <el-input v-model="currentPath" disabled>
+                    <template #prepend>
+                        <el-select placeholder="快捷跳转" style="width: 115px"  @change="routeSaveDir">
+                            <el-option v-for="item in optionsPath" :key="item" :value="item"></el-option>
+                        </el-select>
+                    </template>
+                    <template #append>
+                        <el-button @click="saveDir">
+                            <template #icon>
+                                <i-ep-star />
+                            </template>
+                        </el-button>
+                    </template>
+                </el-input>
                 <el-upload
                     action="fileMgr/upload"
                     :data="{ path: currentPath }"
@@ -38,7 +51,7 @@
             </el-table>
         </div>
         <div style="width: 35%;margin: 16px 0;">
-            <el-input v-model="sendText" type="textarea" :rows="28" placeholder="请输入内容" />
+            <el-input :ref="ref => inputRef = ref" v-model="sendText" type="textarea" :rows="28" placeholder="请输入内容" />
             <div style="margin-top: 16px;">
                 <el-button type="primary" size="small" :loading="sendLoading" @click="handleSend">发送到剪贴板</el-button>
                 <el-button type="primary" size="small" :loading="sendLoading" @click="handleReceive">获取自剪贴板</el-button>
@@ -50,10 +63,14 @@
 <script setup>
 import axios from 'axios'
 import prettyBytes from 'pretty-bytes'
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 
 let tableData = reactive([])
-onMounted(_ => getList("D:/"))
+let optionsPath = reactive([])
+onMounted(_ => {
+    getList("D:/")
+    optionsPath.push(...JSON.parse(localStorage.getItem("optionsPath")))
+})
 let currentPath = ref("")
 let currentPathArr = ["D:"]
 let routePath = (row, del) => {
@@ -74,6 +91,23 @@ let routePath = (row, del) => {
         currentPathArr.pop()
         getFile(path, row)
     }
+}
+let saveDir = () => {
+    optionsPath.push(currentPath.value)
+    let set = new Set(optionsPath)
+    optionsPath.length = 0
+    optionsPath.push(...set)
+    localStorage.setItem("optionsPath", JSON.stringify(optionsPath))
+    ElMessage({
+        message: "Saved!",
+        type: 'success',
+    })
+}
+let routeSaveDir = (path) => {
+    currentPathArr.length = 0
+    currentPathArr.push(...path.split("/"))
+    currentPath.value = path
+    getList(path)
 }
 let getFile = (path, row) => {
     if (row.size > 1000 * 1000 * 30 || row.name.includes(".exe")) {
@@ -172,6 +206,8 @@ let handleSend = () => {
         sendLoading.value = false
     })
 }
+
+const inputRef = ref(null)
 let handleReceive = () => {
     sendLoading.value = true
     const options = {
@@ -182,6 +218,15 @@ let handleReceive = () => {
     axios.request(options).then(res => {
         if (res.status == 200 && res.data.succMsg == 'ok') {
             sendText.value = res.data.data
+            nextTick(() => {
+                const inputElement = inputRef.value.textarea
+                inputElement.select();
+                document.execCommand('copy')
+                ElMessage({
+                    message: "已复制",
+                    type: 'success',
+                })
+            })
         }
         sendLoading.value = false
     }).catch(err =>{
