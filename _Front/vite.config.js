@@ -12,6 +12,16 @@ const pathSrc = path.resolve(__dirname, "src");
 
 export default defineConfig({
     base: './',
+    server: {
+        port: 8089,
+        proxy: {
+            "/fileMgr": {
+                target: 'https://paytest.czcb.com.cn:26001/other/my2525',
+                changeOrigin: true,
+                logLevel: "debug"
+            }
+        }
+    },
     resolve: {
         alias: {
             "@": pathSrc,

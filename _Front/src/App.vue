@@ -69,6 +69,7 @@ let tableData = reactive([])
 let optionsPath = reactive([])
 onMounted(_ => {
     getList("D:/")
+    // 读取之前保存的地址
     optionsPath.push(...JSON.parse(localStorage.getItem("optionsPath")))
 })
 let currentPath = ref("")
@@ -80,16 +81,11 @@ let routePath = (row, del) => {
         currentPathArr.push(row.name)
     }
     let path = currentPathArr.length == 1 ? currentPathArr[0] + "/" : currentPathArr.join("/")
-    if (del === "del") {
-        currentPathArr.pop()
-        handelDelete(path)
-        return
-    }
     if (row.isDir) {
         getList(path)
     } else {
         currentPathArr.pop()
-        getFile(path, row)
+        del === "del" ? deleteFile(path) : getFile(path, row)
     }
 }
 let saveDir = () => {
@@ -125,7 +121,7 @@ let getFile = (path, row) => {
         document.body.removeChild(link)
     }
 }
-let handelDelete = (path) => {
+let deleteFile = (path) => {
     const options = {
         method: 'POST',
         url: 'fileMgr/delFile',
@@ -152,7 +148,14 @@ let getList = (path) => {
             if (path != "D:/") {
                 tableData.push({ name: "..", isDir: true, size: '' })
             }
-            tableData.push(...res.data.data)
+            let fileList = res.data.data.filter(f => f.name.split('.').pop() != 'lnk')
+            tableData.push(...fileList.sort((a, b) => {
+                if (a.isDir == b.isDir) {
+                    return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+                } else {
+                    return a.isDir ? -1 : 1
+                }
+            }))
         }
     })
 }
