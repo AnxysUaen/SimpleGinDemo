@@ -3,10 +3,11 @@ package routers
 import (
 	"SimpleGinDemo/controllers"
 	"SimpleGinDemo/middlewares"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() {
@@ -43,6 +44,10 @@ func InitRouter() {
 	{
 		tools.POST("/sendText", controllers.SendText)
 		tools.POST("/getText", controllers.GetText)
+	}
+	mongos := router.Group("/mongos")
+	{
+		mongos.POST("/saveLog", controllers.SaveLog)
 	}
 
 	if err := router.Run("0.0.0.0:8888"); err != nil {
