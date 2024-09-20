@@ -65,7 +65,7 @@ func SaveLog(c *gin.Context) {
 	var jsonObj map[string]interface{}
 	err := json.Unmarshal([]byte(requestData.JSONData), &jsonObj)
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "反序列化JSON失败"})
 	}
 
 	if requestData.RequestID == "" {
@@ -82,8 +82,7 @@ func SaveLog(c *gin.Context) {
 		// 插入文档
 		insertResult, err := collection.InsertOne(context.TODO(), insertData)
 		if err != nil {
-			log.Fatal(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert log"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "插入数据库失败"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "successfully", "InsertedID": insertResult.InsertedID})
@@ -94,8 +93,7 @@ func SaveLog(c *gin.Context) {
 		}
 		result, err := collection.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
-			log.Fatal(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update log"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "更新响应失败"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": result.UpsertedID})
