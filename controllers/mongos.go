@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -93,7 +94,8 @@ func SaveLog(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "successfully", "InsertedID": insertResult.InsertedID})
 	} else {
-		filter := bson.M{"_id": requestData.RequestID}
+		objID, _ := primitive.ObjectIDFromHex(requestData.RequestID)
+		filter := bson.M{"_id": objID}
 		var update bson.M
 		if jsonErr != nil {
 			update = bson.M{
