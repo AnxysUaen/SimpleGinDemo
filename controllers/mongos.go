@@ -34,10 +34,12 @@ func initMongoClient() {
 
 // 接收的Log参数
 type InsertData struct {
-	Name     string    `bson:"Name"`
-	Time     time.Time `bson:"Time"`
-	Request  bson.M    `bson:"Request"`
-	Response bson.M    `bson:"Response"`
+	Name      string    `bson:"Name"`
+	Time      time.Time `bson:"Time"`
+	Request   bson.M    `bson:"Request"`
+	Response  bson.M    `bson:"Response"`
+	ReqString string    `bson:"ReqString"`
+	ResString string    `bson:"ResString"`
 }
 
 func SaveLog(c *gin.Context) {
@@ -63,10 +65,7 @@ func SaveLog(c *gin.Context) {
 	collection := client.Database("bmp_m_logs").Collection(requestData.DataSource)
 
 	var jsonObj map[string]interface{}
-	err := json.Unmarshal([]byte(requestData.JSONData), &jsonObj)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "反序列化JSON失败"})
-	}
+	jsonErr := json.Unmarshal([]byte(requestData.JSONData), &jsonObj)
 
 	if requestData.RequestID == "" {
 		parsedTime, err := time.Parse("2006-01-02 15:04:05", requestData.Time)
@@ -74,10 +73,17 @@ func SaveLog(c *gin.Context) {
 			fmt.Println("Error parsing time:", err)
 		}
 		insertData := InsertData{
-			Name:     requestData.Name,
-			Time:     parsedTime,
-			Request:  bson.M(jsonObj),
-			Response: bson.M{},
+			Name:      requestData.Name,
+			Time:      parsedTime,
+			Request:   bson.M{},
+			Response:  bson.M{},
+			ReqString: "",
+			ResString: "",
+		}
+		if jsonErr != nil {
+			insertData.ReqString = requestData.JSONData
+		} else {
+			insertData.Request = jsonObj
 		}
 		// 插入文档
 		insertResult, err := collection.InsertOne(context.TODO(), insertData)
@@ -88,8 +94,15 @@ func SaveLog(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "successfully", "InsertedID": insertResult.InsertedID})
 	} else {
 		filter := bson.M{"_id": requestData.RequestID}
-		update := bson.M{
-			"$set": bson.M{"Response": bson.M(jsonObj)},
+		var update bson.M
+		if jsonErr != nil {
+			update = bson.M{
+				"$set": bson.M{"ResString": requestData.JSONData},
+			}
+		} else {
+			update = bson.M{
+				"$set": bson.M{"Response": bson.M(jsonObj)},
+			}
 		}
 		result, err := collection.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
