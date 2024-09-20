@@ -34,11 +34,10 @@ func initMongoClient() {
 
 // 接收的Log参数
 type InsertData struct {
-	Name      string    `bson:"Name"`
-	RequestID string    `bson:"RequestID"`
-	Type      string    `bson:"Type"`
-	JSONData  bson.M    `bson:"JSONData"`
-	Time      time.Time `bson:"Time"`
+	Name     string    `bson:"Name"`
+	Time     time.Time `bson:"Time"`
+	Request  bson.M    `bson:"Request"`
+	Response bson.M    `bson:"Response"`
 }
 
 func SaveLog(c *gin.Context) {
@@ -63,32 +62,43 @@ func SaveLog(c *gin.Context) {
 	// 根据requestData.DataSource选择合适的集合
 	collection := client.Database("bmp_m_logs").Collection(requestData.DataSource)
 
-	var result map[string]interface{}
-	err := json.Unmarshal([]byte(requestData.JSONData), &result)
+	var jsonObj map[string]interface{}
+	err := json.Unmarshal([]byte(requestData.JSONData), &jsonObj)
 	if err != nil {
 		log.Fatal(err)
 	}
-	parsedTime, err := time.Parse("2006-01-02 15:04:05", requestData.Time)
-	if err != nil {
-		fmt.Println("Error parsing time:", err)
+
+	if requestData.RequestID == "" {
+		parsedTime, err := time.Parse("2006-01-02 15:04:05", requestData.Time)
+		if err != nil {
+			fmt.Println("Error parsing time:", err)
+		}
+		insertData := InsertData{
+			Name:     requestData.Name,
+			Time:     parsedTime,
+			Request:  bson.M(jsonObj),
+			Response: bson.M{},
+		}
+		// 插入文档
+		insertResult, err := collection.InsertOne(context.TODO(), insertData)
+		if err != nil {
+			log.Fatal(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert log"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "successfully", "InsertedID": insertResult.InsertedID})
+	} else {
+		filter := bson.M{"_id": requestData.RequestID}
+		update := bson.M{
+			"$set": bson.M{"Response": bson.M(jsonObj)},
+		}
+		result, err := collection.UpdateOne(context.TODO(), filter, update)
+		if err != nil {
+			log.Fatal(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update log"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": result.UpsertedID})
 	}
 
-	insertData := InsertData{
-		RequestID: requestData.RequestID,
-		Name:      requestData.Name,
-		JSONData:  bson.M(result),
-		Time:      parsedTime,
-		Type:      requestData.Type,
-	}
-
-	// 插入文档
-	insertResult, err := collection.InsertOne(context.TODO(), insertData)
-	if err != nil {
-		log.Fatal(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert log"})
-		return
-	}
-
-	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-	c.JSON(http.StatusOK, gin.H{"message": "Log inserted successfully"})
 }
